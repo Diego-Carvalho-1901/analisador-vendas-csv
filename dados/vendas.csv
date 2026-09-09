@@ -1,0 +1,16 @@
+data da venda, produto, categoria, quantidade vendida, preco unitario
+2024-01-15, Notebook, Eletronicos, 5, 3500.00
+2024-01-23, Notebook, Eletronicos, 4, 3500.00
+2024-01-20, Notebook, Eletronicos, 6, 3500.00
+2024-01-16, Smartphone, Eletronicos, 10, 1500.00
+2024-01-21, Smartphone, Eletronicos, 15, 1500.00
+2024-01-22, Smartphone, Eletronicos, 20, 1500.00
+2024-01-17, Memoria RAM, Eletronicos, 5, 450.00
+2024-01-18, SSD, Eletronicos, 6, 650.00
+2024-01-19, CPU, Eletronicos, 7, 550.00
+2024-01-15, Monitor, Eletronicos, 8, 570.00
+2024-01-16, Teclado, Perifericos, 12, 120.00
+2024-01-17, Mouse, Perifericos, 15, 80.00
+2024-01-17, Mousepad, Perifericos, 15, 30.00
+2024-01-17, Headset, Perifericos, 10, 150.00
+2024-01-17, PC, Eletronicos, 10, 2800.00
