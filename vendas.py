@@ -113,3 +113,65 @@ def _converter_linha(linha: list[str], numero_linha: int) -> Venda:
         raise ErroLeitura(f"Linha {numero_linha}: preço inválido '{preco_texto}'.")
 
     return Venda(data, produto, categoria, quantidade, preco)
+
+
+def faturamento_total(vendas: Iterable[Venda]) -> Decimal:
+    """Soma o faturamento de todas as vendas."""
+    return sum((venda.faturamento for venda in vendas), Decimal(0))
+
+
+def faturamento_por_produto(vendas: Iterable[Venda]) -> dict[str, Decimal]:
+    """Faturamento somado de cada produto, na ordem em que aparecem no CSV."""
+    totais: dict[str, Decimal] = {}
+    for venda in vendas:
+        totais[venda.produto] = (
+            totais.get(venda.produto, Decimal(0)) + venda.faturamento
+        )
+    return totais
+
+
+def faturamento_por_categoria(vendas: Iterable[Venda]) -> dict[str, Decimal]:
+    """Faturamento somado de cada categoria, na ordem em que aparecem no CSV."""
+    totais: dict[str, Decimal] = {}
+    for venda in vendas:
+        totais[venda.categoria] = (
+            totais.get(venda.categoria, Decimal(0)) + venda.faturamento
+        )
+    return totais
+
+
+def faturamento_por_mes(vendas: Iterable[Venda]) -> dict[str, Decimal]:
+    """Faturamento de cada mês, com chaves "AAAA-MM" em ordem cronológica."""
+    totais: dict[str, Decimal] = {}
+    for venda in vendas:
+        mes = f"{venda.data:%Y-%m}"
+        totais[mes] = totais.get(mes, Decimal(0)) + venda.faturamento
+    return dict(sorted(totais.items()))
+
+
+def quantidade_por_produto(vendas: Iterable[Venda]) -> dict[str, int]:
+    """Unidades vendidas de cada produto."""
+    totais: dict[str, int] = {}
+    for venda in vendas:
+        totais[venda.produto] = totais.get(venda.produto, 0) + venda.quantidade
+    return totais
+
+
+def produto_mais_vendido(vendas: Iterable[Venda]) -> tuple[str, int]:
+    """Produto com mais unidades vendidas e a quantidade.
+
+    Em caso de empate, vence o que aparece primeiro no CSV.
+    """
+    quantidades = quantidade_por_produto(vendas)
+    produto = max(quantidades, key=quantidades.__getitem__)
+    return produto, quantidades[produto]
+
+
+def categoria_mais_faturada(vendas: Iterable[Venda]) -> tuple[str, Decimal]:
+    """Categoria com o maior faturamento e o valor.
+
+    Em caso de empate, vence a que aparece primeiro no CSV.
+    """
+    totais = faturamento_por_categoria(vendas)
+    categoria = max(totais, key=totais.__getitem__)
+    return categoria, totais[categoria]
