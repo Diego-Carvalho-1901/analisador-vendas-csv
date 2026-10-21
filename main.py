@@ -1,118 +1,114 @@
-#############################################################
-###       ANALISADOR DE VENDAS DE UMA EMPRESA             ###
-#############################################################
-# NOME DA EMPRESA: GALO ELETRONICS LTDA                     #
-#                                                           #
-# FUNÇÃO DO PROGRAMA: ANALISAR VENDAS DE PRODUTOS           #
-#                                                           #
-# DESCRIÇÃO: O PROGRAMA DEVE REALIZAR AS SEGUINTES FUNCOES: # 
-# 1. LER UM ARQUIVO CSV COM OS DADOS DE VENDAS DE PRODUTOS; #
-# 2. CALCULAR O FATURAMENTO TOTAL DE CADA PRODUTO;          #
-# 3. CALCULAR O FATURAMENTO TOTAL DE TODOS OS PRODUTOS;     #
-# 4. IDENTIFICAR O PRODUTO MAIS VENDIDO;                    #
-# 5. ANALISAR AS CATEGORIAS E O FATURAMENTO POR CATEGORIA;  #
-#############################################################
+"""Analisador de vendas em CSV — ponto de entrada pela linha de comando.
 
-import csv # importa a biblioteca CSV para ler arquivos CSV
+Lê um CSV de vendas e imprime faturamento por produto, por categoria e por
+mês, o faturamento total, o produto mais vendido e a categoria mais faturada.
+Os dados de exemplo são da empresa fictícia Galo Eletronics Ltda.
 
-arquivo = open('dados/vendas.csv') # abre o arquivo CSV com os dados de vendas
-leitor = csv.reader(arquivo) # permite a leitura do arquivo CSV
+Uso:
+    python main.py                      # usa dados/vendas.csv
+    python main.py caminho/para/arquivo.csv
+"""
 
-next (leitor)     # Pular o cabeçalho para leitura de dados em numeros inteiros
-total = 0   # inicializa a variável total para armazenar a quantidade total de produtos vendidos
-total_faturamento = 0    # inicializa a variável total_faturamento para armazenar o faturamento total
-faturamento_produtos = {} # cria um dicionário para armazenar o faturamento por produto
-maior_quantidade = 0 # inicializa a variável para armazenar a maior quantidade vendida
-produto_mais_vendido = "" # inicializa a variável para armazenar o nome do produto mais vendido
-quantidade_produtos = {} # cria um dicionário para armazenar a quantidade de produtos vendidos
-faturamento_categorias = {} # cria um dicionário para armazenar o faturamento por categoria
-maior_faturamento_categorias = 0 # inicializa variável para saber o maior faturamento por categoria
-categoria_mais_faturada = "" # inicializa variável para saber qual categoria teve o maior faturamento
+import argparse
+import sys
+from decimal import Decimal
+from pathlib import Path
 
+from vendas import (
+    ErroLeitura,
+    Venda,
+    carregar_csv,
+    categoria_mais_faturada,
+    faturamento_por_categoria,
+    faturamento_por_mes,
+    faturamento_por_produto,
+    faturamento_total,
+    produto_mais_vendido,
+)
 
-for linha in leitor:
-    quantidade = int(linha [3])
-    #print(quantidade)
-    total = total + quantidade    # Esta etapa do "for" soma a quantidade de produtos vendidos
-
-    preco = float(linha [4])
-    faturamento = quantidade * preco
-    total_faturamento = total_faturamento + faturamento # Esta etapa do "for" soma o faturamento total
-
-    
-
-    produto = linha[1] # obtém o nome do produto da linha atual
-    categoria = linha[2] # obtém o nome da categoria da linha atual
-
-    if produto in faturamento_produtos: # verifica se o produto já está no dicionário
-        faturamento_produtos[produto] = faturamento_produtos[produto] + faturamento 
-        # L> se o produto já estiver no dicionário, soma o faturamento atual ao faturamento existente
-    else:
-        faturamento_produtos[produto] = faturamento 
-         # L> se o produto não estiver no dicionário, adiciona o produto com o faturamento atual
-
-    if categoria in faturamento_categorias:
-        faturamento_categorias[categoria] = faturamento_categorias[categoria] + faturamento
-        # L> se a categoria já estiver no dicionário, soma o faturamento atual ao existente
-    else:
-        faturamento_categorias[categoria] = faturamento
-        # L> se não estiver no dicionário, adiciona a categoria com o faturamento atual
-
-    if produto in quantidade_produtos:
-        quantidade_produtos[produto] = quantidade_produtos[produto] + quantidade
-        # L> se o produto já estiver no dicionário, soma a quantidade atual à existente
-    else:
-        quantidade_produtos[produto] = quantidade
-        # L> se não estiver no dicionário, adiciona o produto com a quantidade atual
-
-for produto in quantidade_produtos:
-    if quantidade_produtos[produto] > maior_quantidade:
-        maior_quantidade = quantidade_produtos[produto]
-        produto_mais_vendido = produto 
-    # L> se a quantidade atual for maior que a maior quantidade, 
-    # atualiza a maior quantidade e o produto mais vendido
-    
-
-for categoria in faturamento_categorias:
-    if faturamento_categorias[categoria] > maior_faturamento_categorias:
-        maior_faturamento_categorias = faturamento_categorias[categoria]
-        categoria_mais_faturada = categoria 
-        # L> Se o faturamento atual for maior que o maior faturamento,
-        # atualiza o maior faturamento e a categoria mais faturada
+# Resolvido a partir deste arquivo, e não do diretório atual, para o programa
+# funcionar mesmo quando é chamado de outra pasta.
+CSV_PADRAO = Path(__file__).resolve().parent / "dados" / "vendas.csv"
+LARGURA = 48
 
 
-print("================================================")
-print("=========== FATURAMENTO POR PRODUTO ============")
-print("================================================")
-for produto in faturamento_produtos:
-    print(f"= > {produto} : R$ {faturamento_produtos[produto]:.2f}") 
-    # L> Imprime o faturamento por produto
+def gerar_relatorio(vendas: list[Venda]) -> str:
+    """Monta o texto do relatório a partir das vendas."""
+    linhas: list[str] = []
 
-print("================================================")
-print("========== FATURAMENTO POR CATEGORIA ===========")
-print("================================================")
-for categoria in faturamento_categorias:
-    print(f"= > {categoria} : R$ {faturamento_categorias[categoria]:.2f}")
-    # L> Imprime o faturamento por categoria    
+    linhas += _cabecalho("FATURAMENTO POR PRODUTO")
+    linhas += _listar(faturamento_por_produto(vendas))
 
-print("================================================")
-print("============== FATURAMENTO TOTAL ===============")
-print("================================================")
-print(f"= > Total do faturamento: R$ {total_faturamento:.2f}") # Imprime o faturamento total
+    linhas += _cabecalho("FATURAMENTO POR CATEGORIA")
+    linhas += _listar(faturamento_por_categoria(vendas))
 
-print("================================================")
-print("============= PRODUTO MAIS VENDIDO =============")
-print("================================================")
-print(f"= > Produto mais vendido: {produto_mais_vendido}") # Imprime o produto mais vendido
-print(f"= > Quantidade: {maior_quantidade}") # Imprime a quantidade do produto mais vendido
-print(f"= > Faturamento: R$ {faturamento_produtos[produto_mais_vendido]:.2f}")
-        # L>Imprime o faturamento do produto mais vendido
+    linhas += _cabecalho("FATURAMENTO POR MÊS")
+    linhas += _listar(faturamento_por_mes(vendas))
 
-print("================================================")
-print("=========== CATEGORIA MAIS FATURADA ============")
-print("================================================")
-print(f"= > Categoria mais faturada: {categoria_mais_faturada}") # Imprime a categoria mais faturada
-print(f"= > Faturamento: R$ {maior_faturamento_categorias:.2f}") 
-# L> Imprime o faturamento da categoria mais faturada
+    linhas += _cabecalho("FATURAMENTO TOTAL")
+    linhas.append(f"= > Total do faturamento: {_reais(faturamento_total(vendas))}")
 
-print("================================================")
+    produto, quantidade = produto_mais_vendido(vendas)
+    linhas += _cabecalho("PRODUTO MAIS VENDIDO")
+    linhas.append(f"= > Produto mais vendido: {produto}")
+    linhas.append(f"= > Quantidade: {quantidade}")
+    linhas.append(
+        f"= > Faturamento: {_reais(faturamento_por_produto(vendas)[produto])}"
+    )
+
+    categoria, valor = categoria_mais_faturada(vendas)
+    linhas += _cabecalho("CATEGORIA MAIS FATURADA")
+    linhas.append(f"= > Categoria mais faturada: {categoria}")
+    linhas.append(f"= > Faturamento: {_reais(valor)}")
+
+    linhas.append("=" * LARGURA)
+    return "\n".join(linhas)
+
+
+def _cabecalho(titulo: str) -> list[str]:
+    """Título centralizado entre duas linhas de '='."""
+    return ["=" * LARGURA, f" {titulo} ".center(LARGURA, "="), "=" * LARGURA]
+
+
+def _listar(totais: dict[str, Decimal]) -> list[str]:
+    """Uma linha "= > nome : R$ valor" para cada item."""
+    return [f"= > {nome} : {_reais(valor)}" for nome, valor in totais.items()]
+
+
+def _reais(valor: Decimal) -> str:
+    """Formata no padrão brasileiro: R$ 1.234,56."""
+    texto = f"{valor:,.2f}"  # 1,234.56
+    return "R$ " + texto.replace(",", "_").replace(".", ",").replace("_", ".")
+
+
+def criar_parser() -> argparse.ArgumentParser:
+    """Define os argumentos aceitos na linha de comando."""
+    parser = argparse.ArgumentParser(
+        description="Analisa um CSV de vendas e imprime o faturamento."
+    )
+    parser.add_argument(
+        "csv",
+        nargs="?",
+        type=Path,
+        default=CSV_PADRAO,
+        help="CSV com as colunas data da venda, produto, categoria, "
+        "quantidade vendida, preco unitario (padrão: dados/vendas.csv)",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Lê o CSV, imprime o relatório e devolve o código de saída do programa."""
+    argumentos = criar_parser().parse_args(argv)
+    try:
+        vendas = carregar_csv(argumentos.csv)
+    except ErroLeitura as erro:
+        print(f"Erro: {erro}", file=sys.stderr)
+        return 1
+
+    print(gerar_relatorio(vendas))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
