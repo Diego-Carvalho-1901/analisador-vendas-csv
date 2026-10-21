@@ -1,0 +1,3 @@
+# Dependências para rodar o analisador.
+# Hoje ele usa só a biblioteca padrão do Python (csv, decimal, datetime,
+# argparse), então não há pacotes externos.
