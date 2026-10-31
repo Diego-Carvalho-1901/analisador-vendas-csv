@@ -1,23 +1,40 @@
 # Analisador de Vendas em CSV
 
+[![CI](https://github.com/Diego-Carvalho-1901/analisador-vendas-csv/actions/workflows/ci.yml/badge.svg)](https://github.com/Diego-Carvalho-1901/analisador-vendas-csv/actions/workflows/ci.yml)
+
 ## Sobre o projeto
 
 Este projeto consiste em um analisador de vendas desenvolvido em Python, que processa dados armazenados em um arquivo CSV contendo informações como produtos, categorias, quantidade de unidades vendidas e preços unitários. A aplicação realiza diferentes análises, como faturamento por produto, produto mais vendido, faturamento por categoria, categoria com maior faturamento e faturamento total. Os resultados são apresentados no terminal, permitindo uma visualização mais clara do desempenho das vendas e dos produtos comercializados.
 
 ## Tecnologias utilizadas
 
-- Python
-- Biblioteca `csv`
-- Arquivos no formato CSV
+- Python 3.12 (biblioteca padrão: `csv`, `decimal`, `argparse`, `pathlib`)
+- [pytest](https://docs.pytest.org/) para os testes
+- [ruff](https://docs.astral.sh/ruff/) como linter e formatador
+- GitHub Actions para integração contínua
 
 ## Funcionalidades
 
 - Cálculo do faturamento total
 - Cálculo do faturamento por produto
-- Identificação do produto mais vendido
 - Cálculo do faturamento por categoria
+- Cálculo do faturamento por mês (a partir da coluna de data)
+- Identificação do produto mais vendido
 - Identificação da categoria com maior faturamento
+- Mensagens de erro claras, com o número da linha, para arquivos inválidos
 
+## Estrutura do projeto
+
+```text
+analisador-vendas-csv/
+├── main.py              # ponto de entrada: argumentos, relatório e mensagens de erro
+├── vendas.py            # modelo Venda, leitura do CSV e cálculos (funções puras)
+├── dados/
+│   └── vendas.csv       # dados de exemplo (empresa fictícia)
+├── tests/               # testes com pytest
+├── requirements.txt     # dependências do programa (hoje, só a biblioteca padrão)
+└── requirements-dev.txt # dependências de desenvolvimento (pytest e ruff)
+```
 
 ## Como executar
 
@@ -51,6 +68,24 @@ O CSV precisa ter as colunas `data da venda, produto, categoria, quantidade vend
 com datas no formato `AAAA-MM-DD` e preços com ponto decimal (`3500.00`).
 Se o arquivo não existir ou alguma linha estiver inválida, o programa mostra uma
 mensagem dizendo qual linha corrigir e termina com código de saída 1.
+
+## Como rodar os testes
+
+Recomenda-se um ambiente virtual:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate        # no Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+
+pytest                # roda todos os testes da pasta tests/
+ruff check .          # procura erros e más práticas no código
+ruff format --check . # confere a formatação (use "ruff format ." para corrigir)
+```
+
+Os mesmos comandos rodam automaticamente no GitHub Actions a cada push na `main`
+e em todo pull request (arquivo `.github/workflows/ci.yml`). O selo no topo deste
+README mostra se a última execução passou.
 
 ## Exemplo de saída
 
