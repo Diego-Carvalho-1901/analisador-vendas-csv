@@ -6,6 +6,14 @@
 
 Este projeto consiste em um analisador de vendas desenvolvido em Python, que processa dados armazenados em um arquivo CSV contendo informações como produtos, categorias, quantidade de unidades vendidas e preços unitários. A aplicação realiza diferentes análises, como faturamento por produto, produto mais vendido, faturamento por categoria, categoria com maior faturamento e faturamento total. Os resultados são apresentados no terminal, permitindo uma visualização mais clara do desempenho das vendas e dos produtos comercializados.
 
+## Relação com o app financeiro
+
+Este analisador é o ponto de partida do
+[sistema de controle financeiro](https://github.com/Diego-Carvalho-1901/sistema-controle-financeiro),
+um app financeiro para autônomos e MEIs. Lá, as vendas passam a fazer parte do
+mesmo modelo de dados das finanças pessoais, separando a conta do negócio da conta
+pessoal e calculando o lucro (item [05] do roteiro).
+
 ## Tecnologias utilizadas
 
 - Python 3.12 (biblioteca padrão: `csv`, `decimal`, `argparse`, `pathlib`)
